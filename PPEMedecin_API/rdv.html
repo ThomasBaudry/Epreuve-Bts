@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+
+      <script type="text/javascript" src="//webii.eu/tool/cookie/cookie.js?box_radius=10&amp;skin=cookielaw5&amp;position=bottom&amp;animation=shake&amp;delay=0&amp;bg_color=006eff&amp;msg_color=ffffff&amp;msg=En%20poursuivant%20votre%20navigation%20sur%20ce%20site%2C%20vous%20acceptez%20l'utilisation%20de%20Cookies%20conform%C3%A9ment%20indiquer%20dans%20les%20conditions%20g%C3%A9n%C3%A9ral%20d'utilisation%209.1.&amp;link_color=00ffd8&amp;morelink=http%3A%2F%2F172.19.0.29%2FPPE_Medecin%2FpageWeb%2Fmentionlegal.html&amp;learnmore=En%20savoir%20plus&amp;accept_text=Accepter&amp;accept_radius=100&amp;accept_color=ffffff"></script>
+
+      
+              <nav class="nav">
+  <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
+  <a class="nav-link" href="rdv.html">Rendez-vous</a>
+  <a class="nav-link" href="deconnexion.html">Deconnexion</a> 
+  <a class="nav-link" href="mentionlegal.html" target="_blank">CGU</a>
+</nav>
+		<h1> Page de Rendez-Vous </h1>
+    <div class="row">
+
+      <script type="text/javascript">
+      getId();
+      function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+        if(getCookie(cname) == ""){
+              document.location.href="http://172.19.0.29/PPE_Medecin/pageWeb/connexion.html"
+            }
+      }
+      function getId(){
+        let cname = "authentification";    
+        $.ajax({
+                    url: "http://172.19.0.29/PPE_Medecin/index.php?action=patient&token="+getCookie(cname),
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR){
+                      var id = data[0].idPatient;
+                      console.log(data);
+                      afficheRdv(id);
+                    }
+               });
+
+      }
+      function afficheRdv(id){
+        let b = document.body;
+        $.ajax({
+                  url:"http://172.19.0.29/PPE_Medecin/index.php?action=rdv&id="+id,
+                  type: "GET",
+                  dataType: "json",
+                  success: function(data, textStatus, jqXHR){
+                    console.log(data);
+                    for(let i = 0; i < data.length; i++){
+                      var carte= " <div class=\"col-sm-6\">  <div class=\"card\">  <div class=\"card-body\">  <h5 class=\"card-title\"><span id=\"message\"></span></h5> <p class=\"card-text\">"+changeDate(data[i].dateHeureRdv)+"</p><button type=\"button\" onclick='' name=\"modifRdv\" class=\"btn btn-outline-primary\"> Modifier </button>   <button type=\"button\" onclick='supprimer(\""+data[i].idRdv+"\")' name=\"supRdv\" class=\"btn btn-outline-primary\"> Supprimer </button> </div> </div> </div>";
+                      b.insertAdjacentHTML('afterend', carte);
+                      getMedecin(data[i].idMedecin, i);
+                      }
+                      
+                  }
+              });
+      }
+     function changeDate(dateSql) {
+        var date = sqlToJsDate(dateSql);
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+        var hour = date.getHours();
+        var min = date.getMinutes();
+        var combined = '' + add0toNumber(day) + '/' + add0toNumber(month) + '/' + year + "  " + add0toNumber(hour) + ":" + add0toNumber(min);
+        return combined;
+      }
+      function sqlToJsDate(sqlDate){
+        //sqlDate in SQL DATETIME format ("yyyy-mm-dd hh:mm:ss.ms")
+        var sqlDateArr1 = sqlDate.split("-");
+        //format of sqlDateArr1[] = ['yyyy','mm','dd hh:mm:ms']
+        var sYear = sqlDateArr1[0];
+        var sMonth = (Number(sqlDateArr1[1]) - 1).toString();
+        var sqlDateArr2 = sqlDateArr1[2].split(" ");
+        //format of sqlDateArr2[] = ['dd', 'hh:mm:ss.ms']
+        var sDay = sqlDateArr2[0];
+        var sqlDateArr3 = sqlDateArr2[1].split(":");
+        //format of sqlDateArr3[] = ['hh','mm','ss.ms']
+        var sHour = sqlDateArr3[0];
+        var sMinute = sqlDateArr3[1];
+        var sqlDateArr4 = sqlDateArr3[2].split(".");
+        //format of sqlDateArr4[] = ['ss','ms']
+        var sSecond = sqlDateArr4[0];
+        var sMillisecond = sqlDateArr4[1];
+         
+        return new Date(sYear,sMonth,sDay,sHour,sMinute,sSecond);
+      }
+      function add0toNumber(chaine){
+        if(chaine.toString().length == 1){
+          return "0" + chaine;
+        }
+        else{
+          return chaine;
+        }
+      }
+      function getMedecin(id, nb){
+        var nom = "test";
+        $.ajax({
+          url: "https://data.issy.com/api/records/1.0/search/?dataset=medecins-generalistes-et-infirmiers&rows=100",
+          type: "GET",
+          dataType: "json",
+          success: function(data, textStatus, jqXHR){
+            console.log(data);
+            for(let i = 0; i < data.records.length; i++){
+              if(data.records[i].recordid == id){
+                nom = data.records[i].fields.nom +" "+ data.records[i].fields.prenom;
+                message.textContent = nom;
+              }  
+            }
+          }
+        });
+      }
+      function modifier(){
+
+      }
+      function supprimer(idRdv){
+      	$.ajax({
+                    url: "http://172.19.0.29/PPE_Medecin/index.php?action=rdv&id="+idRdv,
+                    type: "DELETE",
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR){
+                      alert("Rendez-Vous supprimer !");
+                      document.location.href="http://172.19.0.29/PPE_Medecin/pageWeb/rdv.html"; 
+                    }
+               });
+      }
+      </script>
+      <!--
+      <h5 class="card-title">Doctor pedencule</h5>
+      <p class="card-text">18/02/2021 10:00</p>
+      <a href="#" class="btn btn-primary">Modifier</a>
+      <a href="#" class="btn btn-primary">Supprimer</a>
+      -->
+   
+    </div>
+	</body>
+</html>
+<!-- http://172.19.0.29/PPE_Medecin/index.php?action=rdv&id="IdPatient" -->

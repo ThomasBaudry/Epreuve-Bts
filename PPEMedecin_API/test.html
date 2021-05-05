@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Les formulaires</title>
+        <meta charset="utf-8">   
+        <style>label{display: inline-block;min-width: 200px;}</style>
+    </head>
+    
+    <body>
+        <h1>Les formulaires HTML</h1>
+        <form method="post" action="traitement.php">
+            <label for='user'>Entrez votre nom d'utilisateur : </label>
+            <input type='text' name='user' id='user' maxlength='20' required>
+            <span id='mUser'></span><br>
+            
+             
+            <input type='submit' value='Valider' id='ok'>
+        </form>
+        
+        <script>
+            var formValid = document.getElementById('ok');
+            var user = document.getElementById('user');
+            var mUser = document.getElementById('mUser');
+            var validUser = /^[a-zA-ZéèîïÉÈÎÏ][a-zéèêàçîï]+([-'\s][a-zA-ZéèîïÉÈÎÏ][a-zéèêàçîï]+)?$/;
+            
+            formValid.addEventListener('click', validation);
+            
+            function validation(event){
+                //Si le champ est vide
+                if (user.validity.valueMissing){
+                    event.preventDefault();
+                    mUser.textContent = 'nom d\'utilisateur manquant';
+                    mUser.style.color = 'red';
+                //Si le format de données est incorrect
+                }else if (validUser.test(user.value) == false){
+                    event.preventDefault();
+                    mUser.textContent = 'Format incorrect';
+                    mUser.style.color = 'orange';
+                }else{ 
+                }
+            }
+        </script>
+    </body>
+</html>
