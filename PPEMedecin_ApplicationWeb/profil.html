@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    </head>
+    <body>
+               <nav class="nav">
+  <a class="nav-link active" aria-current="page" href="./index.html">Home</a>
+  <a class="nav-link" href="rdv.html">Rendez-vous</a>
+  <a class="nav-link" href="profil.html">Profil</a>
+  <a class="nav-link" href="inscription.html">Inscription</a>
+  <a class="nav-link" href="connexion.html">Connexion</a>
+  <a class="nav-link" href="mentionlegal.html">CGU</a>
+</nav>
+		<h1> Page de profil d'utilisateur</h1>
+
+    <script type="text/javascript">
+      let b = document.body;
+      let cname = "authentification";
+      function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+          var c = ca[i];
+          while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+          }
+          if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+          }
+        }
+        return "";
+      }
+      
+$.ajax({
+            url: "http://172.19.0.29/PPE_Medecin/index.php?action=patient&token="+getCookie(cname),
+            type: "GET",
+            dataType: "json",
+            success: function(data, textStatus, jqXHR){
+
+              var prof= " <div class=\"col-sm-6\">  <div class=\"card\">  <div class=\"card-body\"> <h5> <p class=\"card-title\"> Nom : "+data[0].nomPatient+"</p> <p class=\"card-text\"> Prenom : "+data[0].prenomPatient+"</p> <p class=\"card-text\"> Ville : "+data[0].villePatient+"</p><p class=\"card-text\">Rue : "+data[0].ruePatient+"</p><p class=\"card-text\"> Code postal : "+data[0].cpPatient+"</p><p class=\"card-text\">Telephone : "+data[0].telPatient+"</p></h5>  </div>        </div>      </div>"
+                  b.insertAdjacentHTML('afterend', prof);
+              
+              console.log(data);
+            }
+       });
+        
+
+      getId();
+      function getId(){
+        $.ajax({
+                    url: "http://172.19.0.29/PPE_Medecin/index.php?action=patient&token="+getCookie(cname),
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data, textStatus, jqXHR){
+                      var id = data[0].idPatient;
+                      console.log(data);
+                      afficheRdv(id);
+                    }
+               });
+
+      }
+      function afficheRdv(id){
+        $.ajax({
+                  url:"http://172.19.0.29/PPE_Medecin/index.php?action=rdv&id="+id,
+                  type: "GET",
+                  dataType: "json",
+                  success: function(data, textStatus, jqXHR){
+                    console.log(data);
+                    for(let i = 0; i < data.length; i++){
+                      var carte= " <div class=\"col-sm-6\">  <div class=\"card\">  <div class=\"card-body\">  <h5 class=\"card-title\"><span id=\"message\"></span></h5> <p class=\"card-text\">"+data[i].dateHeureRdv+"</p> <a href=\"#\" class=\"btn btn-primary\">Modifier</a>  <a href=\"#\" class=\"btn btn-primary\">Supprimer</a> </div> </div> </div>";
+                      b.insertAdjacentHTML('afterend', carte);
+                      getMedecin(data[i].idMedecin, i);
+                      }
+                      
+                  }
+              });
+      }
+      function getMedecin(id, nb){
+        var nom = "test";
+        $.ajax({
+          url: "https://data.issy.com/api/records/1.0/search/?dataset=medecins-generalistes-et-infirmiers&rows=100",
+          type: "GET",
+          dataType: "json",
+          success: function(data, textStatus, jqXHR){
+            console.log(data);
+            for(let i = 0; i < data.records.length; i++){
+              if(data.records[i].recordid == id){
+                nom = data.records[i].fields.nom +" "+ data.records[i].fields.prenom;
+                message.textContent = nom;
+              }  
+            }
+          }
+        });
+      }
+      </script>
+  
+	</body>
+</html>
